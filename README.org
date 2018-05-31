@@ -1,0 +1,4 @@
+** This is my learning EOPL [Essentials of Programming Languages] note.
+*** This is some code from
+    - Lexical code from ML4Wokrs [ML for the Working Programer]
+*** use the Lexical and Parser to replace EOPL SLLGEN
