@@ -1,7 +1,8 @@
-load "Lexical";
+structure Parser :> Parser =
+struct
 open Lexical
 exception ParseError of string 
-fun strip ( tok:string , toks:string list ) : string list=
+fun strip ( tok , toks ) =
     case toks of
 	nil => raise ParseError "strip nil"
      | (first::rest) => (
@@ -12,8 +13,16 @@ fun strip ( tok:string , toks:string list ) : string list=
 datatype Expr = If of Expr * Expr * Expr
 	      | Var of string 
 	      | Binop of string * Expr * Expr
-
-fun parseAtom (toks : string list) : Expr * string list = 
+	      | Let of string * Expr * Expr
+fun elem (target,nil) = false
+  | elem (target,(x::xs)) = if target = x 
+			    then true
+			    else elem (target,xs)	    
+fun parseIdentifier (first::rest) =
+    if not (elem (first ,["if","then","else","let","=","in"]))
+    then (first , rest)
+    else raise ParseError "Identifier error"
+fun parseAtom toks = 
     case toks of 
 	("if"::rest) => (
 	 let val (exp1,rest1) = parseExp rest
@@ -23,17 +32,29 @@ fun parseAtom (toks : string list) : Expr * string list =
 	     (If (exp1,exp2,exp3) , rest3 )
 	 end 
 	 )
+      | ("let"::rest) => 
+	let val (id,rest1)    = parseIdentifier rest
+	    val (value,rest2) = parseExp (strip ("=",rest1))
+	    val (body,rest3)  = parseExp (strip ("in",rest2))
+	in 
+	    ( Let(id,value,body),rest3)
+	end
       | ("("::rest) => (
 	  let val (exp1,rest1) = parseExp rest
 	  in (exp1,strip (")",rest1))
 	  end )
-      | (var::rest) => ( Var var,rest)
+      | rests => (
+	  let val (var,rest) = parseIdentifier rests
+	  in 
+	      (Var var,rest)
+	  end
+      )
       | _ => raise ParseError "parseAtom"
-and parseExp (toks : string list) : Expr * string list =
+and parseExp toks = 
     let val (exp1,rest1) = parseAtom toks
     in parseRest (exp1,rest1)
     end
-and parseRest (exp1 : Expr ,toks : string list) =
+and parseRest (exp1 ,toks ) =
     case toks of
 	("+"::rest1) => (
 	 let
@@ -50,8 +71,15 @@ and parseRest (exp1 : Expr ,toks : string list) =
 	  end
       )
       | _ => (exp1,toks)
-val parse : string -> Expr * string list = parseExp o Lex
-fun read (inp:string) : Expr =
+val parse = parseExp o Lex
+fun read inp =
     case parse inp of
 	(result,nil) => result
-      | _ => raise ParseError "read"
+      | _ => raise ParseError "read" 
+fun show expr =
+    case expr of
+	Var v => v
+      | Binop (opname,left,right) => (show left) ^ " " ^ opname ^ " " ^ (show right)
+      | If (exp1,exp2,exp3) => "if " ^ (show exp1) ^ " then " ^ (show exp2) ^ " else " ^ (show exp3)
+      | Let (id,value,body) => "let " ^ id ^ "=" ^ (show value) ^ " in " ^ (show body)
+end 

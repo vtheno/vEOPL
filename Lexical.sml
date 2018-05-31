@@ -9,7 +9,7 @@ fun IsLetter x =
     ("a" <= x andalso x <= "z") orelse
     ("A" <= x andalso x <= "Z") 
 fun IsSeparator x =
-    (x = " " orelse x = "\n" orelse x = "\t")
+    (x = " " orelse x = "\\n" orelse x = "\\t")
 fun explode "" = []
   | explode str = List.map (Char.toString) (String.explode str)
 fun implode [] = ""
