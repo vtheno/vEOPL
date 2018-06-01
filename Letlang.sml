@@ -17,29 +17,35 @@ fun eval_expr (expr,env) =
       )
 *)
 exception NoBindingFound of string
-exception InvalidEnv
+(* exception InvalidEnv *)
 datatype 'a Enviorment = Empty
 		      | ExtendEnv of string * 'a  * 'a Enviorment
-fun apply_env (env:'a Enviorment,search_var:string) =
+fun apply_env (env:'a Enviorment,search_var:string) : 'a  =
     case env of
 	Empty => raise NoBindingFound search_var
-      | ExtendEnv ( save_var,save_val,save_env ) => 
-	 if save_var = search_var 
-	 then save_val
-	 else apply_env (save_env,search_var)
-      | _ => raise InvalidEnv
+      | ExtendEnv ( save_var,save_val,save_env ) => (
+	  if save_var = search_var 
+	  then save_val
+	  else apply_env (save_env,search_var)
+      )
+(*      | _ => raise InvalidEnv *)
+fun true_value expr =
+    case expr of
+	Var _ => true
+      | _ => false
+exception ValueOfErr
 fun valueOf (expr,env) =
     case expr of
 	(Var id) => apply_env (env,id)
       | If(e1,e2,e3) => (
-	  if valueOf (e1,env) = 1
+	  if true_value(e1)
 	  then valueOf (e2,env)
 	  else valueOf (e3,env)
       )
       | Let(id,value,body) => (
-	let val v = valueOf(value,env)
-	in valueOf (body,ExtendEnv (id,v,env))
-	end 
+	  let val v = valueOf(value,env)
+	  in valueOf (body,ExtendEnv (id,v,env))
+	  end 
       )
       | Binop("+",l,r) => 
 	let val lv = valueOf(l,env)
@@ -53,6 +59,7 @@ fun valueOf (expr,env) =
 	in 
 	    lv - rv
 	end
+      | _ => raise ValueOfErr
 fun main () =
     let
 	fun loop () = 

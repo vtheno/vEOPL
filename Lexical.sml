@@ -31,6 +31,7 @@ fun GetIdent (x::l) =
     if IsLetter x
     then GetIdentAux [x] l
     else raise GetIdentErr
+  | GetIdent _ = raise GetIdentErr
 fun GetTail p buf [] = (implode (List.rev buf),[])
   | GetTail p buf (l as (x::xs)) = 
     if p x 
@@ -41,6 +42,7 @@ fun GetSymbol spectab tok [] = (tok,[])
     if Mem x (Get tok spectab)
     then GetSymbol spectab (tok^x) xs
     else (tok,l)
+exception GetNextTokenErr
 fun GetNextToken spectab [x] = (x,[])
   | GetNextToken spectab (x::(l as c::cs)) = 
     if IsLetter x then GetTail (fn x => IsLetter x orelse IsDigit x) [x] l
@@ -49,6 +51,7 @@ fun GetNextToken spectab [x] = (x,[])
     else if Mem c (Get x spectab)
     then GetSymbol spectab (implode [x,c]) cs
     else (x,l)
+  | GetNextToken spectab _ = raise GetNextTokenErr
 fun Tokenise spectab [] = []
   | Tokenise spectab (l as x::l') = 
     if IsSeparator x

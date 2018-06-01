@@ -22,6 +22,7 @@ fun parseIdentifier (first::rest) =
     if not (elem (first ,["if","then","else","let","=","in"]))
     then (first , rest)
     else raise ParseError "Identifier error"
+  | parseIdentifier _ = raise ParseError "Identifier error"
 fun parseAtom toks = 
     case toks of 
 	("if"::rest) => (
@@ -49,7 +50,7 @@ fun parseAtom toks =
 	      (Var var,rest)
 	  end
       )
-      | _ => raise ParseError "parseAtom"
+      (* | _ => raise ParseError "parseAtom" *)
 and parseExp toks = 
     let val (exp1,rest1) = parseAtom toks
     in parseRest (exp1,rest1)
