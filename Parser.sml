@@ -44,7 +44,7 @@ fun parseAtom toks =
 	  let val (exp1,rest1) = parseExp rest
 	  in (exp1,strip (")",rest1))
 	  end )
-      | rests => (
+      | rests => ( (* is Ident then parseIdentifier elif is Num then parseNum else ... *)
 	  let val (var,rest) = parseIdentifier rests
 	  in 
 	      (Var var,rest)

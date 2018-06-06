@@ -75,5 +75,3 @@ fun main () =
 	loop ()
     end 
 val _ = main ()
-
-	     
