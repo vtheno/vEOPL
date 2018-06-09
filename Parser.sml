@@ -76,7 +76,7 @@ val parse = parseExp o Lex
 fun read inp =
     case parse inp of
 	(result,nil) => result
-      | _ => raise ParseError "read" 
+      | _ => raise ParseError ("read: " ^ inp )
 fun show expr =
     case expr of
 	Var v => v

@@ -67,8 +67,11 @@ fun main () =
 	     let 
 		 val inp = TextIO.inputLine TextIO.stdIn
 	     in 
-		 print ("=> " ^ (Int.toString  (valueOf ((read inp) ,ExtendEnv("x",6,Empty) ) )   ) ^ "\n");
-		 loop ()
+		 let val expr = read inp
+		 in 
+		     print ("=> " ^ (Int.toString  (valueOf (expr ,ExtendEnv("x",6,Empty))) ) ^ "\n");
+		     loop ()
+		 end
 	     end
 	    )
     in 
