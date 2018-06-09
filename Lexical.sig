@@ -19,4 +19,7 @@ sig
 		   string list -> string list
     val SpecTab : (string * string list) list
     val Lex : string -> string list
+    val IsNumber : string list -> bool
+    val IsAlphaAux : string list -> bool
+    val IsAlpha : string list -> bool
 end
