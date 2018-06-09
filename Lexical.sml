@@ -13,8 +13,17 @@ fun IsSeparator x =
 fun explode "" = []
   | explode str = List.map (Char.toString) (String.explode str)
 fun implode [] = ""
-  | implode ((x::xs):string list) = 
-    x ^ (implode xs)
+  | implode ((x::xs):string list) = x ^ (implode xs)
+fun IsNumber nil = false
+  | IsNumber [x] = IsDigit x
+  | IsNumber (x::xs) = IsDigit x andalso (IsNumber xs)
+fun IsAlphaAux nil = false
+  | IsAlphaAux [x] = IsDigit x orelse IsLetter x
+  | IsAlphaAux (x::xs) = (IsDigit x orelse IsLetter x) andalso IsAlphaAux xs
+fun IsAlpha nil = false
+  | IsAlpha (x::xs) = if IsLetter x
+		      then IsAlphaAux xs
+		      else false
 fun GetNumAux buf [] = (implode (List.rev buf) ,[])
   | GetNumAux buf (l as (x::l'))  = 
     if IsDigit x
@@ -31,6 +40,7 @@ fun GetIdent (x::l) =
     if IsLetter x
     then GetIdentAux [x] l
     else raise GetIdentErr
+  | GetIdent _ = raise GetIdentErr
 fun GetTail p buf [] = (implode (List.rev buf),[])
   | GetTail p buf (l as (x::xs)) = 
     if p x 
@@ -41,6 +51,7 @@ fun GetSymbol spectab tok [] = (tok,[])
     if Mem x (Get tok spectab)
     then GetSymbol spectab (tok^x) xs
     else (tok,l)
+exception GetNextTokenErr
 fun GetNextToken spectab [x] = (x,[])
   | GetNextToken spectab (x::(l as c::cs)) = 
     if IsLetter x then GetTail (fn x => IsLetter x orelse IsDigit x) [x] l
@@ -49,6 +60,7 @@ fun GetNextToken spectab [x] = (x,[])
     else if Mem c (Get x spectab)
     then GetSymbol spectab (implode [x,c]) cs
     else (x,l)
+  | GetNextToken spectab _ = raise GetNextTokenErr
 fun Tokenise spectab [] = []
   | Tokenise spectab (l as x::l') = 
     if IsSeparator x
